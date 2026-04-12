@@ -2,36 +2,55 @@ import streamlit as st
 import pandas as pd
 
 # Page setup
-st.set_page_config(page_title="Candidate Screening App", layout="wide")
-st.title("🎯 Smart Candidate Screening App")
+st.set_page_config(page_title="APP", layout="wide")
+st.title("APP")
 
 try:
-    # Unga Excel file name-ah inga correct-ah kuduthuruken
+    # Excel file-ah read pannudhu
     df = pd.read_excel('candidates_resume_data_100.xlsx', engine='openpyxl')
     
-    st.sidebar.header("Filter Candidates")
+    st.sidebar.header("🔍 Advanced Filters")
     
-    # 1. Name search
-    search = st.sidebar.text_input("Candidate Name search panna:")
+    # 1. Search by Name
+    search = st.sidebar.text_input("Name vechu search panna:")
     
-    # 2. Qualification filter (Excel-la irukura column name 'Degree' nu iruka-nu check pannunga)
-    if 'Degree' in df.columns:
-        qual_options = ["All"] + list(df['Degree'].unique())
-        selected_qual = st.sidebar.selectbox("Qualification select pannunga:", qual_options)
+    # 2. Filter by Skills (Pudhu Option!)
+    # Unga Excel-la 'Skills' nu column irukanum
+    if 'Skills' in df.columns:
+        # Mothamulla skills-ah list edukka
+        all_skills = set()
+        for s in df['Skills'].dropna():
+            for skill in s.split(','): # Comma vechu skills-ah pirikkurom
+                all_skills.add(skill.strip())
         
-        filtered_df = df.copy()
-        if search:
-            filtered_df = filtered_df[filtered_df['Name'].str.contains(search, case=False, na=False)]
-        if selected_qual != "All":
-            filtered_df = filtered_df[filtered_df['Degree'] == selected_qual]
-            
-        st.subheader(f"Results: {len(filtered_df)} candidates found")
-        st.dataframe(filtered_df, use_container_width=True)
+        selected_skill = st.sidebar.selectbox("Skill select pannunga:", ["All"] + sorted(list(all_skills)))
     else:
-        # Oru velai 'Degree' nu column illana, ellathaiyum kaatum
-        st.warning("Note: 'Degree' nu column illa, so filtering apply aagala.")
-        st.dataframe(df, use_container_width=True)
+        st.sidebar.warning("Note: Excel-la 'Skills' nu column illa.")
+        selected_skill = "All"
+
+    # 3. Filter by Degree
+    if 'Degree' in df.columns:
+        degree_options = ["All"] + list(df['Degree'].unique())
+        selected_degree = st.sidebar.selectbox("Degree select pannunga:", degree_options)
+    else:
+        selected_degree = "All"
+
+    # Filtering Logic
+    filtered_df = df.copy()
+    
+    if search:
+        filtered_df = filtered_df[filtered_df['Name'].str.contains(search, case=False, na=False)]
+    
+    if selected_skill != "All":
+        filtered_df = filtered_df[filtered_df['Skills'].str.contains(selected_skill, case=False, na=False)]
+        
+    if selected_degree != "All":
+        filtered_df = filtered_df[filtered_df['Degree'] == selected_degree]
+
+    # Results Display
+    st.subheader(f"Found {len(filtered_df)} Matching Candidates")
+    st.dataframe(filtered_df, use_container_width=True)
 
 except Exception as e:
     st.error(f"Error: {e}")
-    st.info("Kabi, GitHub-la file name 'candidates_resume_data_100.xlsx' nu correct-ah iruka-nu check pannunga.")
+
