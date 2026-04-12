@@ -3,7 +3,7 @@ import pandas as pd
 
 # Page setup
 st.set_page_config(page_title="Candidate Screening App", layout="wide")
-st.title("🎯 Smart Candidate Screening Dashboard")
+st.title("🎯 Smart Candidate Screening App")
 
 try:
     # Unga Excel file name-ah inga correct-ah kuduthuruken
