@@ -7,7 +7,7 @@ st.title("🎯 Smart Candidate Screening Dashboard")
 
 try:
     # Unga Excel file name-ah inga correct-ah kuduthuruken
-    df = pd.read_excel('candidates_resume_data_100.xlsx')
+    df = pd.read_excel('candidates_resume_data_100.xlsx', engine='openpyxl')
     
     st.sidebar.header("Filter Candidates")
     
