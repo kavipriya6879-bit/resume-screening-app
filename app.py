@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 
 # Page setup
-st.set_page_config(page_title="APP", layout="wide")
-st.title("APP")
+st.set_page_config(page_title="resume-screening-app", layout="wide")
+st.title("resume-screening-app")
 
 try:
     # Excel file-ah read pannudhu
@@ -12,7 +12,7 @@ try:
     st.sidebar.header("🔍 Advanced Filters")
     
     # 1. Search by Name
-    search = st.sidebar.text_input("Name vechu search panna:")
+    search = st.sidebar.text_input("Name:")
     
     # 2. Filter by Skills (Pudhu Option!)
     # Unga Excel-la 'Skills' nu column irukanum
@@ -23,7 +23,7 @@ try:
             for skill in s.split(','): # Comma vechu skills-ah pirikkurom
                 all_skills.add(skill.strip())
         
-        selected_skill = st.sidebar.selectbox("Skill select pannunga:", ["All"] + sorted(list(all_skills)))
+        selected_skill = st.sidebar.selectbox("Skill:", ["All"] + sorted(list(all_skills)))
     else:
         st.sidebar.warning("Note: Excel-la 'Skills' nu column illa.")
         selected_skill = "All"
@@ -31,7 +31,7 @@ try:
     # 3. Filter by Degree
     if 'Degree' in df.columns:
         degree_options = ["All"] + list(df['Degree'].unique())
-        selected_degree = st.sidebar.selectbox("Degree select pannunga:", degree_options)
+        selected_degree = st.sidebar.selectbox("Degree:", degree_options)
     else:
         selected_degree = "All"
 
