@@ -1,86 +1,76 @@
+
+
+
+
+import streamlit as st
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog, messagebox
 
-# Global dataframe
-df = None
+# Page setup
+st.set_page_config(page_title="Smart Resume Scanner", layout="wide")
+st.title("🎯 Automated Resume Screening APP")
 
-# Upload file
-def upload_file():
-    global df
+# 1. File Upload Option (Inga dhaan file-ah scan panna start pannudhu)
+uploaded_file = st.file_uploader("Unga Excel illana CSV file-ah inga upload pannunga", type=['xlsx', 'csv'])
 
-    file_path = filedialog.askopenfilename(
-        filetypes=[("CSV Files", "*.csv")]
-    )
+if uploaded_file is not None:
+    try:
+        # File type-ah paathu read pannudhu
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_excel(uploaded_file, engine='openpyxl')
+        
+        st.success("File Successfully Scanned!")
+        
+        # Sidebar - Advanced Filters
+        st.sidebar.header("🔍 Best Candidate Filters")
+        
+        # 1. Search by Name
+        search = st.sidebar.text_input("Name vechu search panna:")
+        
+        # 2. Skill-based Screening
+        if 'Skills' in df.columns:
+            all_skills = set()
+            for s in df['Skills'].dropna():
+                for skill in str(s).split(','):
+                    all_skills.add(skill.strip())
+            selected_skill = st.sidebar.selectbox("Skill match panna:", ["All"] + sorted(list(all_skills)))
+        else:
+            selected_skill = "All"
 
-    if file_path:
-        df = pd.read_csv(file_path)
-        messagebox.showinfo("Success", "File Uploaded Successfully!")
-        show_data()
+        # 3. Experience Screening (Automatic Best Candidate Logic)
+        if 'Experience_Years' in df.columns:
+            min_exp = st.sidebar.slider("Minimum Experience (Years):", 0, int(df['Experience_Years'].max()), 0)
+        else:
+            min_exp = 0
 
-# Show all data
-def show_data():
-    if df is not None:
-        text.delete(1.0, tk.END)
-        text.insert(tk.END, df.to_string())
-    else:
-        messagebox.showwarning("Warning", "Please upload a file first")
+        # --- Filtering Logic ---
+        filtered_df = df.copy()
+        
+        # Filter 1: Name
+        if search:
+            filtered_df = filtered_df[filtered_df['Name'].str.contains(search, case=False, na=False)]
+        
+        # Filter 2: Skills
+        if selected_skill != "All":
+            filtered_df = filtered_df[filtered_df['Skills'].str.contains(selected_skill, case=False, na=False)]
+            
+        # Filter 3: Experience (Selecting the BEST candidates)
+        if min_exp > 0:
+            filtered_df = filtered_df[filtered_df['Experience_Years'] >= min_exp]
 
-# Filter by skill
-def filter_skill():
-    if df is None:
-        messagebox.showwarning("Warning", "Upload file first")
-        return
+        # Results Display
+        st.subheader(f"Found {len(filtered_df)} Matching Candidates")
+        
+        # Highlight top candidates (Optional - Best ones mela varum)
+        if 'Experience_Years' in filtered_df.columns:
+            filtered_df = filtered_df.sort_values(by='Experience_Years', ascending=False)
 
-    skill = entry.get()
+        st.dataframe(filtered_df, use_container_width=True)
 
-    if skill == "":
-        messagebox.showwarning("Warning", "Enter a skill")
-        return
+    except Exception as e:
+        st.error(f"Error: {e}. File columns names (Name, Skills, Experience_Years) correct-ah irukanu check pannunga.")
 
-    filtered = df[df['Skills'].str.contains(skill, case=False, na=False)]
-
-    text.delete(1.0, tk.END)
-
-    if filtered.empty:
-        text.insert(tk.END, "No candidates found")
-    else:
-        text.insert(tk.END, filtered.to_string())
-
-# Best candidates (ranking)
-def best_candidates():
-    if df is None:
-        messagebox.showwarning("Warning", "Upload file first")
-        return
-
-    # Score logic: Experience priority
-    ranked = df.copy()
-    ranked["Score"] = ranked["Experience"] * 10
-
-    best = ranked.sort_values(by="Score", ascending=False).head(5)
-
-    text.delete(1.0, tk.END)
-    text.insert(tk.END, "🏆 BEST CANDIDATES:\n\n")
-    text.insert(tk.END, best.to_string(index=False))
-
-# UI
-app = tk.Tk()
-app.title("Automated Resume Screening System")
-app.geometry("750x500")
-
-tk.Label(app, text="Resume Screening AI System", font=("Arial", 16, "bold")).pack(pady=10)
-
-tk.Button(app, text="📂 Upload CSV File", command=upload_file).pack(pady=5)
-tk.Button(app, text="📊 Show All Data", command=show_data).pack(pady=5)
-
-tk.Label(app, text="Enter Skill to Filter").pack()
-entry = tk.Entry(app, width=30)
-entry.pack(pady=5)
-
-tk.Button(app, text="🔍 Filter Candidates", command=filter_skill).pack(pady=5)
-tk.Button(app, text="🏆 Best Candidates", command=best_candidates).pack(pady=5)
-
-text = tk.Text(app, height=20, width=90)
-text.pack(pady=10)
-
-app.mainloop()
+else:
+    st.info("Mela irukura button-ah click panni candidate data-voda Excel file-ah upload pannunga.")
+    st.image("https://img.icons8.com/clouds/200/upload.png") # Oru chinna icon for look
