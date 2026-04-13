@@ -1,3 +1,4 @@
 streamlit
 pandas
 openpyxl
+plotly  # Indha extra library map draw panna helpful-ah irukkum
