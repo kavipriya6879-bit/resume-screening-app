@@ -72,5 +72,5 @@ if uploaded_file is not None:
         st.error(f"Error: {e}. File columns names (Name, Skills, Experience_Years) correct-ah irukanu check pannunga.")
 
 else:
-    st.info("Mela irukura button-ah click panni candidate data-voda Excel file-ah upload pannunga.")
+    st.info("Upload your file in the above space.")
     st.image("https://img.icons8.com/clouds/200/upload.png") # Oru chinna icon for look
