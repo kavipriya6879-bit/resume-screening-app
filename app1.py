@@ -55,7 +55,7 @@ st.markdown("""
         font-weight: bold;
     }
     </style>
-    """, unsafe_safe_origin=True)
+    """, unsafe_allow_html=True)
 
 # --- 2. Logo and Header Section ---
 with st.container():
