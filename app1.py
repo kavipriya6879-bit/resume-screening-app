@@ -10,7 +10,7 @@ st.set_page_config(page_title="Smart Resume Scanner", layout="wide")
 st.title("🎯 Automated Resume Screening APP")
 
 # 1. File Upload Option (Inga dhaan file-ah scan panna start pannudhu)
-uploaded_file = st.file_uploader("Unga Excel illana CSV file-ah inga upload pannunga", type=['xlsx', 'csv'])
+uploaded_file = st.file_uploader("upload your resume ", type=['xlsx', 'csv'])
 
 if uploaded_file is not None:
     try:
@@ -26,7 +26,7 @@ if uploaded_file is not None:
         st.sidebar.header("🔍 Best Candidate Filters")
         
         # 1. Search by Name
-        search = st.sidebar.text_input("Name vechu search panna:")
+        search = st.sidebar.text_input("Name Search(optional):")
         
         # 2. Skill-based Screening
         if 'Skills' in df.columns:
@@ -34,7 +34,7 @@ if uploaded_file is not None:
             for s in df['Skills'].dropna():
                 for skill in str(s).split(','):
                     all_skills.add(skill.strip())
-            selected_skill = st.sidebar.selectbox("Skill match panna:", ["All"] + sorted(list(all_skills)))
+            selected_skill = st.sidebar.selectbox("Skill :", ["All"] + sorted(list(all_skills)))
         else:
             selected_skill = "All"
 
